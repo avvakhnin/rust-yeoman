@@ -1,0 +1,14 @@
+[package]
+name = "rust-yoeman"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+edict = "=1.0.0-rc7"
+rltk = { version = "0.8.7"}
+object-pool = "0.5"
+#rltk = { version = "0.8.7", features = ["crossterm"], default-features = false }
+
+
+[patch.crates-io]
+edict = { path = "../edict" }
