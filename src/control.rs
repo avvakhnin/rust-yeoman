@@ -7,7 +7,7 @@ use crate::{
     flow_timer::wait_pause_entity,
     math::QuasiRect,
 };
-use edict::{query::Entities, world::World};
+use edict::{flow::FlowWorld, query::Entities, world::World};
 use rltk::{Point, ROYALBLUE4, Rect, Rltk, VirtualKeyCode};
 
 #[derive(Hash, Eq, PartialEq)]
@@ -122,6 +122,12 @@ fn create_plant(world: &mut World, pos: Point) {
         .spawn_flow(rotate_render_stack);
 }
 
+fn create_plant_flow(world: &mut FlowWorld, pos: Point) {
+    world
+        .spawn_external((pos, Renderable::new_blank()))
+        .spawn_flow(rotate_render_stack);
+}
+
 fn start_future(gs: &mut State) {
     let epoch_id = gs.world.epoch();
     let player_id = gs.player_id.clone();
@@ -142,9 +148,6 @@ fn start_future(gs: &mut State) {
         if is_modified {
             return;
         }
-
-        fe.world()
-            .spawn_external((pos, Renderable::new_blank()))
-            .spawn_flow(rotate_render_stack);
+        create_plant_flow(&mut fe.world(), pos);
     });
 }
