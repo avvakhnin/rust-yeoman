@@ -8,7 +8,7 @@ mod math;
 mod terminal_constants;
 
 use camera::{Camera, move_camera};
-use components::Renderable;
+use components::{RenderStack, Renderable};
 use control::{ControlMode, player_input};
 use edict::{entity::EntityId, flow::Flows, scheduler::Scheduler, world::World};
 use flow_timer::init_flow_timers;
@@ -50,7 +50,7 @@ fn main() -> rltk::BError {
     world.ensure_external_registered::<Point>();
     world.ensure_external_registered::<Rect>();
     world.ensure_external_registered::<Renderable>();
-
+    world.ensure_component_registered::<RenderStack>();
     let player_id = world
         .spawn_external((start_position, Renderable::new('Ӂ', rltk::RED)))
         .id();

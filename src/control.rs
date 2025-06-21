@@ -1,11 +1,14 @@
 use std::cmp::{max, min};
 
 use crate::{
-    State, ambience::map::MAP_BORDER, components::Renderable, flow_timer::wait_pause_entity,
+    State,
+    ambience::map::MAP_BORDER,
+    components::{Renderable, rotate_render_stack},
+    flow_timer::wait_pause_entity,
     math::QuasiRect,
 };
 use edict::{query::Entities, world::World};
-use rltk::{Point, Rect, Rltk, VirtualKeyCode};
+use rltk::{Point, ROYALBLUE4, Rect, Rltk, VirtualKeyCode};
 
 #[derive(Hash, Eq, PartialEq)]
 pub enum ControlMode {
@@ -114,7 +117,9 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
 }
 
 fn create_plant(world: &mut World, pos: Point) {
-    world.spawn_external((pos, Renderable::new('.', rltk::YELLOW)));
+    world
+        .spawn_external((pos, Renderable::new('.', rltk::YELLOW)))
+        .spawn_flow(rotate_render_stack);
 }
 
 fn start_future(gs: &mut State) {
@@ -139,6 +144,7 @@ fn start_future(gs: &mut State) {
         }
 
         fe.world()
-            .spawn_external((pos, Renderable::new('.', rltk::YELLOW)));
+            .spawn_external((pos, Renderable::new_blank()))
+            .spawn_flow(rotate_render_stack);
     });
 }
