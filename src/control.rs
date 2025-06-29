@@ -1,6 +1,7 @@
 use std::{
     cmp::{max, min},
     env::var,
+    ops::ControlFlow,
 };
 
 use crate::{
@@ -19,6 +20,7 @@ pub enum ControlMode {
     Player,
     Cursor,
     Corner,
+    Auto,
 }
 
 impl ControlMode {
@@ -27,6 +29,7 @@ impl ControlMode {
             ControlMode::Player => ControlMode::Cursor,
             ControlMode::Cursor => ControlMode::Corner,
             ControlMode::Corner => ControlMode::Player,
+            ControlMode::Auto => ControlMode::Player,
         };
         if let ControlMode::Cursor = gs.mode {
             let pos = gs.world.view::<&Point>();
@@ -42,11 +45,16 @@ impl ControlMode {
         }
     }
 
+    fn switch_auto_mode(gs: &mut State) {
+        gs.mode = ControlMode::Auto
+    }
+
     fn process_moving(gs: &State, delta_x: i32, delta_y: i32) {
         match gs.mode {
             ControlMode::Player => Self::try_move_player(gs, delta_x, delta_y),
             ControlMode::Cursor => Self::try_move_cursor_start(gs, delta_x, delta_y),
             ControlMode::Corner => Self::try_move_cursor_end(gs, delta_x, delta_y),
+            ControlMode::Auto => (),
         }
     }
 
@@ -55,6 +63,7 @@ impl ControlMode {
             ControlMode::Player => start_future(gs),
             ControlMode::Cursor => Self::process_action_on_cursor(gs),
             ControlMode::Corner => Self::process_action_on_cursor(gs),
+            ControlMode::Auto => (),
         }
     }
 
@@ -114,7 +123,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
             VirtualKeyCode::Down => ControlMode::process_moving(gs, 0, 1),
             VirtualKeyCode::Return => ControlMode::process_action(gs),
             VirtualKeyCode::Space => ControlMode::switch_control_mode(gs),
-            VirtualKeyCode::A => ControlMode::switch_control_mode(gs),
+            VirtualKeyCode::A => ControlMode::switch_auto_mode(gs),
             _ => {}
         },
     }
