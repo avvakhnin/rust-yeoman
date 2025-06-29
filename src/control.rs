@@ -1,14 +1,18 @@
-use std::cmp::{max, min};
+use std::{
+    cmp::{max, min},
+    env::var,
+};
 
 use crate::{
     State,
     ambience::map::MAP_BORDER,
-    components::{Renderable, rotate_render_stack},
+    components::{PlanJob, Renderable, rotate_render_stack},
     flow_timer::wait_pause_entity,
     math::QuasiRect,
+    spawn::{create_plan_job, create_plant_flow},
 };
-use edict::{flow::FlowWorld, query::Entities, world::World};
-use rltk::{Point, ROYALBLUE4, Rect, Rltk, VirtualKeyCode};
+use edict::{entity::EntityId, flow::FlowWorld, query::Entities, world::World};
+use rltk::{ColorPair, Point, ROYALBLUE4, Rect, Rltk, VirtualKeyCode};
 
 #[derive(Hash, Eq, PartialEq)]
 pub enum ControlMode {
@@ -61,7 +65,7 @@ impl ControlMode {
             .try_get_mut(gs.cursor_id)
             .expect("Cursor does not exist");
         rect.envelop_rect()
-            .for_each(|p| create_plant(&mut gs.world, p));
+            .for_each(|p| create_plan_job(&mut gs.world, p, gs.player_id));
     }
 
     fn try_move_player(gs: &State, delta_x: i32, delta_y: i32) {
@@ -110,22 +114,10 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
             VirtualKeyCode::Down => ControlMode::process_moving(gs, 0, 1),
             VirtualKeyCode::Return => ControlMode::process_action(gs),
             VirtualKeyCode::Space => ControlMode::switch_control_mode(gs),
-
+            VirtualKeyCode::A => ControlMode::switch_control_mode(gs),
             _ => {}
         },
     }
-}
-
-fn create_plant(world: &mut World, pos: Point) {
-    world
-        .spawn_external((pos, Renderable::new('.', rltk::YELLOW)))
-        .spawn_flow(rotate_render_stack);
-}
-
-fn create_plant_flow(world: &mut FlowWorld, pos: Point) {
-    world
-        .spawn_external((pos, Renderable::new_blank()))
-        .spawn_flow(rotate_render_stack);
 }
 
 fn start_future(gs: &mut State) {

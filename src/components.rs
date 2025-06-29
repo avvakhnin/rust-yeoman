@@ -58,3 +58,6 @@ pub async fn rotate_render_stack(flow_entity: FlowEntity) {
         wait_pause_entity(flow_entity, 1000f32).await;
     }
 }
+
+#[derive(Component)]
+pub struct PlanJob {}

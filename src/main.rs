@@ -5,12 +5,22 @@ mod control;
 mod flow_timer;
 mod gui;
 mod math;
+mod spawn;
 mod terminal_constants;
 
+use std::any::Any;
+
 use camera::{Camera, move_camera};
-use components::{RenderStack, Renderable};
+use components::{PlanJob, RenderStack, Renderable};
 use control::{ControlMode, player_input};
-use edict::{entity::EntityId, flow::Flows, scheduler::Scheduler, world::World};
+use edict::{
+    entity::{Entity, EntityId},
+    flow::Flows,
+    prelude::ChildOf,
+    query::Entities,
+    scheduler::Scheduler,
+    world::World,
+};
 use flow_timer::init_flow_timers;
 use rltk::{DrawBatch, GameState, Point, Rect, Rltk, render_draw_buffer};
 use terminal_constants::Consoles;
@@ -49,8 +59,9 @@ fn main() -> rltk::BError {
 
     world.ensure_external_registered::<Point>();
     world.ensure_external_registered::<Rect>();
-    world.ensure_external_registered::<Renderable>();
+    world.ensure_component_registered::<Renderable>();
     world.ensure_component_registered::<RenderStack>();
+    world.ensure_component_registered::<PlanJob>();
     let player_id = world
         .spawn_external((start_position, Renderable::new('Ӂ', rltk::RED)))
         .id();
@@ -98,5 +109,20 @@ impl GameState for State {
         gui::hud::draw_hud(self, &mut draw_batch);
 
         render_draw_buffer(context).expect("Render error");
+
+        let mut view = self
+            .world
+            .view::<(Entities, &PlanJob, &mut Renderable)>()
+            .filter_relates_to::<ChildOf>(self.player_id);
+        let mut e_id: Option<EntityId> = None;
+        if let Some((e, _, _)) = view.iter_mut().next() {
+            println!("{}", e.id());
+            e_id = Some(e.id());
+        }
+        drop(view);
+        if let Some(e_id) = e_id {
+            self.world.despawn(e_id);
+            println!("{}", e_id);
+        }
     }
 }
