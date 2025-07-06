@@ -8,23 +8,18 @@ mod math;
 mod spawn;
 mod terminal_constants;
 
-use std::any::Any;
-
 use camera::{Camera, move_camera};
-use components::{Mover, PlanJob, RenderStack, Renderable, process_mover};
+use components::{
+    HareBrain, Mover, PlanJob, RenderStack, Renderable, process_hare_brain, process_mover,
+};
 use control::{ControlMode, player_input};
 use edict::{
-    entity::{Entity, EntityId},
-    flow::Flows,
-    prelude::{ChildOf, Res},
-    query::Entities,
-    scheduler::Scheduler,
-    view::View,
+    entity::EntityId, flow::Flows, prelude::ChildOf, query::Entities, scheduler::Scheduler,
     world::World,
 };
 use flow_timer::init_flow_timers;
 use rltk::{DrawBatch, GameState, Point, Rect, Rltk, render_draw_buffer};
-use spawn::start_hare;
+use spawn::{create_player, start_hare};
 use terminal_constants::Consoles;
 
 rltk::embedded_resource!(TTILE_FONT3, "../resources/unicode_16x16.png");
@@ -65,10 +60,9 @@ fn main() -> rltk::BError {
     world.ensure_component_registered::<RenderStack>();
     world.ensure_component_registered::<PlanJob>();
     world.ensure_component_registered::<Mover>();
-    start_hare(&mut world, &Point::new(0, 50));
-    let player_id = world
-        .spawn_external((start_position, Renderable::new('Ӂ', rltk::RED)))
-        .id();
+    world.ensure_component_registered::<HareBrain>();
+    start_hare(&mut world, Point::new(0, 50));
+    let player_id = create_player(&mut world, start_position);
     let cursor_id = world
         .spawn_external((Rect::with_exact(20, 50, 20, 50),))
         .id();
@@ -76,6 +70,7 @@ fn main() -> rltk::BError {
     let mut scheduler = Scheduler::new();
     init_flow_timers(&mut world, &mut scheduler);
     scheduler.add_system(process_mover);
+    scheduler.add_system(process_hare_brain);
     let gs = State {
         world,
         scheduler,
@@ -127,7 +122,6 @@ impl GameState for State {
         drop(view);
         if let Some(e_id) = e_id {
             self.world.despawn(e_id);
-            println!("{}", e_id);
         }
     }
 }

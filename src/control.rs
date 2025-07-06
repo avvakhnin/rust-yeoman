@@ -90,8 +90,8 @@ impl ControlMode {
             .try_get_mut(gs.player_id)
             .expect("Player does not exist");
 
-        pos.x = min(MAP_BORDER.x2 - 1, max(MAP_BORDER.x1, pos.x + delta_x));
-        pos.y = min(MAP_BORDER.y2 - 1, max(MAP_BORDER.y1, pos.y + delta_y));
+        pos.x = (pos.x + delta_x).clamp(MAP_BORDER.x1, MAP_BORDER.x2 - 1);
+        pos.y = (pos.y + delta_y).clamp(MAP_BORDER.y1, MAP_BORDER.y2 - 1);
     }
 
     fn try_move_cursor_start(gs: &State, delta_x: i32, delta_y: i32) {
