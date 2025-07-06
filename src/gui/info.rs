@@ -10,5 +10,6 @@ pub fn draw_info(gs: &State, draw_batch: &mut DrawBatch) {
 
     let pos = format!("{} {} ", pos.x, pos.y);
     draw_batch.print(Point::new(1, STATIC_GUI.y1 + 1), pos);
+    draw_batch.print(Point::new(1, STATIC_GUI.y1 + 2), &gs.mode);
     draw_batch.submit(INFO_Z_ORDER).expect("Batch error");
 }

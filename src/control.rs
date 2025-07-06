@@ -1,3 +1,4 @@
+use core::fmt;
 use std::{
     cmp::{max, min},
     env::var,
@@ -15,7 +16,7 @@ use crate::{
 use edict::{entity::EntityId, flow::FlowWorld, query::Entities, world::World};
 use rltk::{ColorPair, Point, ROYALBLUE4, Rect, Rltk, VirtualKeyCode};
 
-#[derive(Hash, Eq, PartialEq)]
+#[derive(Hash, Eq, PartialEq, Debug)]
 pub enum ControlMode {
     Player,
     Cursor,
@@ -23,6 +24,11 @@ pub enum ControlMode {
     Auto,
 }
 
+impl fmt::Display for ControlMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Debug::fmt(self, f)
+    }
+}
 impl ControlMode {
     fn switch_control_mode(gs: &mut State) {
         gs.mode = match &gs.mode {
