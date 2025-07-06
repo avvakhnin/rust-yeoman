@@ -1,5 +1,9 @@
-use edict::{flow::FlowEntity, prelude::Component};
-use rltk::{ColorPair, FontCharType, RGBA};
+use edict::{
+    flow::FlowEntity,
+    prelude::{Component, Res},
+    view::View,
+};
+use rltk::{ColorPair, FontCharType, Point, PointF, RGBA};
 
 use crate::flow_timer::wait_pause_entity;
 
@@ -61,3 +65,74 @@ pub async fn rotate_render_stack(flow_entity: FlowEntity) {
 
 #[derive(Component)]
 pub struct PlanJob {}
+
+enum Direction {
+    Left,
+    Right,
+    Top,
+    Down,
+}
+
+#[derive(Component)]
+pub struct Mover {
+    offset: f32,
+    speed: f32,
+    direction: Option<Direction>,
+}
+
+impl Mover {
+    pub fn new() -> Self {
+        Mover {
+            offset: 0.,
+            speed: 0.,
+            direction: None,
+        }
+    }
+    pub fn new_speed(speed: f32) -> Self {
+        Mover {
+            offset: 0.,
+            speed,
+            direction: None,
+        }
+    }
+    pub fn move_left(&mut self) {
+        self.direction = Some(Direction::Left)
+    }
+    pub fn move_right(&mut self) {
+        self.direction = Some(Direction::Right)
+    }
+    pub fn move_top(&mut self) {
+        self.direction = Some(Direction::Top)
+    }
+    pub fn move_down(&mut self) {
+        self.direction = Some(Direction::Down)
+    }
+    fn stop(&mut self) {
+        self.offset = 0.;
+        self.direction = None;
+    }
+}
+
+pub fn process_mover(v: View<(&mut Point, &mut Mover)>, d: Res<f32>) {
+    for (p, m) in v {
+        if m.direction.is_none() {
+            return;
+        }
+        let no_half = m.offset < 0.5;
+        println!("{} {}", m.offset, *d);
+        m.offset += m.speed * *d;
+        if no_half && m.offset >= 0.5 {
+            match m.direction {
+                Some(Direction::Left) => p.x -= 1,
+                Some(Direction::Right) => p.x += 1,
+                Some(Direction::Top) => p.y -= 1,
+                Some(Direction::Down) => p.y += 1,
+                None => unreachable!(),
+            }
+        }
+
+        if m.offset > 1. {
+            m.stop();
+        }
+    }
+}

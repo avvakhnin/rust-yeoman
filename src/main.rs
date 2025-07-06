@@ -11,18 +11,20 @@ mod terminal_constants;
 use std::any::Any;
 
 use camera::{Camera, move_camera};
-use components::{PlanJob, RenderStack, Renderable};
+use components::{Mover, PlanJob, RenderStack, Renderable, process_mover};
 use control::{ControlMode, player_input};
 use edict::{
     entity::{Entity, EntityId},
     flow::Flows,
-    prelude::ChildOf,
+    prelude::{ChildOf, Res},
     query::Entities,
     scheduler::Scheduler,
+    view::View,
     world::World,
 };
 use flow_timer::init_flow_timers;
 use rltk::{DrawBatch, GameState, Point, Rect, Rltk, render_draw_buffer};
+use spawn::start_hare;
 use terminal_constants::Consoles;
 
 rltk::embedded_resource!(TTILE_FONT3, "../resources/unicode_16x16.png");
@@ -62,6 +64,8 @@ fn main() -> rltk::BError {
     world.ensure_component_registered::<Renderable>();
     world.ensure_component_registered::<RenderStack>();
     world.ensure_component_registered::<PlanJob>();
+    world.ensure_component_registered::<Mover>();
+    start_hare(&mut world, &Point::new(0, 50));
     let player_id = world
         .spawn_external((start_position, Renderable::new('Ӂ', rltk::RED)))
         .id();
@@ -71,6 +75,7 @@ fn main() -> rltk::BError {
 
     let mut scheduler = Scheduler::new();
     init_flow_timers(&mut world, &mut scheduler);
+    scheduler.add_system(process_mover);
     let gs = State {
         world,
         scheduler,
