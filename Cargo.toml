@@ -5,10 +5,14 @@ edition = "2024"
 
 [dependencies]
 edict = "=1.0.0-rc7"
-rltk = { version = "0.8.7"}
 object-pool = "0.5"
+#rltk = { version = "0.8.7"}
 #rltk = { version = "0.8.7", features = ["crossterm"], default-features = false }
-
+rltk = { path = "../bracket-lib/rltk", default-features = false }
 
 [patch.crates-io]
 edict = { path = "../edict" }
+
+[features]
+default = ["rltk/opengl"]
+tablet = ["rltk/curses"]
