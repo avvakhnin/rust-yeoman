@@ -20,7 +20,7 @@ pub const STATIC_GUI: Rect = Rect {
 };
 
 #[cfg(feature = "tablet")]
-pub const MAIN_CONSOLE_DIMENSION: Point = Point::constant(60, 40);
+pub const MAIN_CONSOLE_DIMENSION: Point = Point::constant(120, 40);
 #[cfg(feature = "tablet")]
 pub const ADDITIONAL_CONSOLE_DIMENSION: Point = Point::constant(120, 40);
 
