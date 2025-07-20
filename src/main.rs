@@ -36,23 +36,24 @@ fn main() -> rltk::BError {
     let Point { x: aw, y: ah } = Consoles::AdditionalVga.dimensions();
     let (mfw, mfh) = Consoles::Main.font_dimensions();
     let (afw, afh) = Consoles::AdditionalVga.font_dimensions();
+
+    #[cfg(feature = "default")]
     let mut context = RltkBuilder::new()
         .with_title("Однодворец")
         .with_dimensions(mw, mh)
         .with_tile_dimensions(mfw, mfh)
-        .with_font(Consoles::Main.font(), mfw, mfh);
-
-    #[cfg(feature = "default")]
-    let mut context = context
+        .with_font(Consoles::Main.font(), mfw, mfh)
         .with_simple_console(mw, mh, Consoles::Main.font())
         .with_font(Consoles::AdditionalVga.font(), afw, afh)
         .with_simple_console_no_bg(aw, ah, Consoles::AdditionalVga.font())
         .build()?;
 
     #[cfg(feature = "tablet")]
-    let mut context = context
+    let mut context = RltkBuilder::new()
+        .with_title("Однодворец")
+        .with_dimensions(mw, mh)
+        .with_font(Consoles::Main.font(), mfw, mfh)
         .with_simple_console(mw, mh, Consoles::Main.font())
-        .with_font(Consoles::AdditionalVga.font(), afw, afh)
         .with_sparse_console_no_bg(aw, ah, Consoles::AdditionalVga.font())
         .build()?;
 
