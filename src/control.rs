@@ -128,7 +128,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
             VirtualKeyCode::Up => ControlMode::process_moving(gs, 0, -1),
             VirtualKeyCode::Down => ControlMode::process_moving(gs, 0, 1),
             VirtualKeyCode::Return => ControlMode::process_action(gs),
-            VirtualKeyCode::Space => ControlMode::switch_control_mode(gs),
+            VirtualKeyCode::P => ControlMode::switch_control_mode(gs),
             VirtualKeyCode::A => ControlMode::switch_auto_mode(gs),
             _ => {}
         },
