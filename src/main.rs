@@ -8,6 +8,8 @@ mod math;
 mod spawn;
 mod terminal_constants;
 
+use std::task::Context;
+
 use camera::{Camera, move_camera};
 use components::{
     HareBrain, Mover, PlanJob, RenderStack, Renderable, process_hare_brain, process_mover,
@@ -22,9 +24,11 @@ use rltk::{DrawBatch, GameState, Point, Rect, Rltk, render_draw_buffer};
 use spawn::{create_player, start_hare};
 use terminal_constants::Consoles;
 
+#[cfg(feature = "default")]
 rltk::embedded_resource!(TTILE_FONT3, "../resources/unicode_16x16.png");
 
 fn main() -> rltk::BError {
+    #[cfg(feature = "default")]
     rltk::link_resource!(TTILE_FONT3, "resources/unicode_16x16.png");
 
     use rltk::RltkBuilder;
@@ -36,12 +40,23 @@ fn main() -> rltk::BError {
         .with_title("Однодворец")
         .with_dimensions(mw, mh)
         .with_tile_dimensions(mfw, mfh)
-        .with_font(Consoles::Main.font(), mfw, mfh)
+        .with_font(Consoles::Main.font(), mfw, mfh);
+
+    #[cfg(feature = "default")]
+    let mut context = context
         .with_simple_console(mw, mh, Consoles::Main.font())
         .with_font(Consoles::AdditionalVga.font(), afw, afh)
         .with_simple_console_no_bg(aw, ah, Consoles::AdditionalVga.font())
         .build()?;
 
+    #[cfg(feature = "tablet")]
+    let mut context = context
+        .with_simple_console(mw, mh, Consoles::Main.font())
+        .with_font(Consoles::AdditionalVga.font(), afw, afh)
+        .with_sparse_console_no_bg(aw, ah, Consoles::AdditionalVga.font())
+        .build()?;
+
+    #[cfg(feature = "default")]
     context.set_translation_mode(0, rltk::CharacterTranslationMode::Unicode);
 
     gui::static_gui::draw_static(&mut context);
