@@ -8,8 +8,6 @@ mod math;
 mod spawn;
 mod terminal_constants;
 
-use std::task::Context;
-
 use camera::{Camera, move_camera};
 use components::{
     HareBrain, Mover, PlanJob, RenderStack, Renderable, process_hare_brain, process_mover,
@@ -137,7 +135,7 @@ impl GameState for State {
         }
         drop(view);
         if let Some(e_id) = e_id {
-            self.world.despawn(e_id);
+            let _ = self.world.despawn(e_id);
         }
     }
 }

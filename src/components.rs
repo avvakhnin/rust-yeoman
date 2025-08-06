@@ -1,17 +1,11 @@
-use std::cmp::{max, min};
-
 use edict::{
     flow::FlowEntity,
     prelude::{Component, Res},
-    query::With,
     view::View,
 };
 use rltk::{ColorPair, FontCharType, Point, RGBA, RandomNumberGenerator};
 
-use crate::{
-    ambience::map::{MAP_BORDER, random_map},
-    flow_timer::wait_pause_entity,
-};
+use crate::{ambience::map::MAP_BORDER, flow_timer::wait_pause_entity};
 
 #[derive(Component)]
 pub struct Renderable {
@@ -87,13 +81,6 @@ pub struct Mover {
 }
 
 impl Mover {
-    pub fn new() -> Self {
-        Mover {
-            offset: 0.,
-            speed: 0.,
-            direction: None,
-        }
-    }
     pub fn new_speed(speed: f32) -> Self {
         Mover {
             offset: 0.,

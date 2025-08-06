@@ -1,10 +1,5 @@
-use edict::{
-    entity::EntityId,
-    flow::FlowWorld,
-    prelude::{ChildOf, Relation},
-    world::World,
-};
-use rltk::{ColorPair, Point, RGBA};
+use edict::{entity::EntityId, flow::FlowWorld, prelude::ChildOf, world::World};
+use rltk::Point;
 
 use crate::components::{HareBrain, Mover, PlanJob, Renderable, rotate_render_stack};
 
@@ -16,7 +11,7 @@ pub fn create_plan_job(world: &mut World, pos: Point, plan_owner: EntityId) {
             PlanJob {},
         ))
         .id();
-    world.insert_relation(plan_job, ChildOf, plan_owner);
+    let _ = world.insert_relation(plan_job, ChildOf, plan_owner);
 }
 
 pub fn create_plant_flow(world: &mut FlowWorld, pos: Point) {

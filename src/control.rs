@@ -1,20 +1,15 @@
 use core::fmt;
-use std::{
-    cmp::{max, min},
-    env::var,
-    ops::ControlFlow,
-};
+use std::cmp::{max, min};
 
 use crate::{
     State,
     ambience::map::MAP_BORDER,
-    components::{PlanJob, Renderable, rotate_render_stack},
     flow_timer::wait_pause_entity,
     math::QuasiRect,
     spawn::{create_plan_job, create_plant_flow},
 };
-use edict::{entity::EntityId, flow::FlowWorld, query::Entities, world::World};
-use rltk::{ColorPair, Point, ROYALBLUE4, Rect, Rltk, VirtualKeyCode};
+use edict::query::Entities;
+use rltk::{Point, Rect, Rltk, VirtualKeyCode};
 
 #[derive(Hash, Eq, PartialEq, Debug)]
 pub enum ControlMode {
