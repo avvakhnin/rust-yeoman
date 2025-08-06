@@ -1,20 +1,15 @@
 use core::fmt;
-use std::{
-    cmp::{max, min},
-    env::var,
-    ops::ControlFlow,
-};
+use std::cmp::{max, min};
 
 use crate::{
     State,
     ambience::map::MAP_BORDER,
-    components::{PlanJob, Renderable, rotate_render_stack},
     flow_timer::wait_pause_entity,
     math::QuasiRect,
     spawn::{create_plan_job, create_plant_flow},
 };
-use edict::{entity::EntityId, flow::FlowWorld, query::Entities, world::World};
-use rltk::{ColorPair, Point, ROYALBLUE4, Rect, Rltk, VirtualKeyCode};
+use edict::query::Entities;
+use rltk::{Point, Rect, Rltk, VirtualKeyCode};
 
 #[derive(Hash, Eq, PartialEq, Debug)]
 pub enum ControlMode {
@@ -90,8 +85,8 @@ impl ControlMode {
             .try_get_mut(gs.player_id)
             .expect("Player does not exist");
 
-        pos.x = min(MAP_BORDER.x2 - 1, max(MAP_BORDER.x1, pos.x + delta_x));
-        pos.y = min(MAP_BORDER.y2 - 1, max(MAP_BORDER.y1, pos.y + delta_y));
+        pos.x = (pos.x + delta_x).clamp(MAP_BORDER.x1, MAP_BORDER.x2 - 1);
+        pos.y = (pos.y + delta_y).clamp(MAP_BORDER.y1, MAP_BORDER.y2 - 1);
     }
 
     fn try_move_cursor_start(gs: &State, delta_x: i32, delta_y: i32) {
@@ -128,7 +123,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
             VirtualKeyCode::Up => ControlMode::process_moving(gs, 0, -1),
             VirtualKeyCode::Down => ControlMode::process_moving(gs, 0, 1),
             VirtualKeyCode::Return => ControlMode::process_action(gs),
-            VirtualKeyCode::Space => ControlMode::switch_control_mode(gs),
+            VirtualKeyCode::P => ControlMode::switch_control_mode(gs),
             VirtualKeyCode::A => ControlMode::switch_auto_mode(gs),
             _ => {}
         },

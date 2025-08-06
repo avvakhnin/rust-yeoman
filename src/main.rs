@@ -8,26 +8,25 @@ mod math;
 mod spawn;
 mod terminal_constants;
 
-use std::any::Any;
-
 use camera::{Camera, move_camera};
-use components::{PlanJob, RenderStack, Renderable};
+use components::{
+    HareBrain, Mover, PlanJob, RenderStack, Renderable, process_hare_brain, process_mover,
+};
 use control::{ControlMode, player_input};
 use edict::{
-    entity::{Entity, EntityId},
-    flow::Flows,
-    prelude::ChildOf,
-    query::Entities,
-    scheduler::Scheduler,
+    entity::EntityId, flow::Flows, prelude::ChildOf, query::Entities, scheduler::Scheduler,
     world::World,
 };
 use flow_timer::init_flow_timers;
 use rltk::{DrawBatch, GameState, Point, Rect, Rltk, render_draw_buffer};
+use spawn::{create_player, start_hare};
 use terminal_constants::Consoles;
 
+#[cfg(feature = "default")]
 rltk::embedded_resource!(TTILE_FONT3, "../resources/unicode_16x16.png");
 
 fn main() -> rltk::BError {
+    #[cfg(feature = "default")]
     rltk::link_resource!(TTILE_FONT3, "resources/unicode_16x16.png");
 
     use rltk::RltkBuilder;
@@ -35,6 +34,8 @@ fn main() -> rltk::BError {
     let Point { x: aw, y: ah } = Consoles::AdditionalVga.dimensions();
     let (mfw, mfh) = Consoles::Main.font_dimensions();
     let (afw, afh) = Consoles::AdditionalVga.font_dimensions();
+
+    #[cfg(feature = "default")]
     let mut context = RltkBuilder::new()
         .with_title("Однодворец")
         .with_dimensions(mw, mh)
@@ -45,6 +46,16 @@ fn main() -> rltk::BError {
         .with_simple_console_no_bg(aw, ah, Consoles::AdditionalVga.font())
         .build()?;
 
+    #[cfg(feature = "tablet")]
+    let mut context = RltkBuilder::new()
+        .with_title("Однодворец")
+        .with_dimensions(mw, mh)
+        .with_font(Consoles::Main.font(), mfw, mfh)
+        .with_simple_console(mw, mh, Consoles::Main.font())
+        .with_sparse_console_no_bg(aw, ah, Consoles::AdditionalVga.font())
+        .build()?;
+
+    #[cfg(feature = "default")]
     context.set_translation_mode(0, rltk::CharacterTranslationMode::Unicode);
 
     gui::static_gui::draw_static(&mut context);
@@ -62,15 +73,18 @@ fn main() -> rltk::BError {
     world.ensure_component_registered::<Renderable>();
     world.ensure_component_registered::<RenderStack>();
     world.ensure_component_registered::<PlanJob>();
-    let player_id = world
-        .spawn_external((start_position, Renderable::new('Ӂ', rltk::RED)))
-        .id();
+    world.ensure_component_registered::<Mover>();
+    world.ensure_component_registered::<HareBrain>();
+    start_hare(&mut world, Point::new(0, 50));
+    let player_id = create_player(&mut world, start_position);
     let cursor_id = world
         .spawn_external((Rect::with_exact(20, 50, 20, 50),))
         .id();
 
     let mut scheduler = Scheduler::new();
     init_flow_timers(&mut world, &mut scheduler);
+    scheduler.add_system(process_mover);
+    scheduler.add_system(process_hare_brain);
     let gs = State {
         world,
         scheduler,
@@ -121,8 +135,7 @@ impl GameState for State {
         }
         drop(view);
         if let Some(e_id) = e_id {
-            self.world.despawn(e_id);
-            println!("{}", e_id);
+            let _ = self.world.despawn(e_id);
         }
     }
 }

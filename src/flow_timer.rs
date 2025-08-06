@@ -54,12 +54,12 @@ fn timer(time_delta: Res<f32>, mut wmap: ResMut<FlowTimerMap>) {
     wmap.wake_flows(*time_delta);
 }
 
-pub async fn wait_pause(fw: FlowWorld, pause_time: f32) {
+pub async fn _wait_pause(fw: FlowWorld, pause_time: f32) {
     let now_time = get_current_time(&fw);
-    wait_until(fw, now_time + pause_time).await;
+    _wait_until(fw, now_time + pause_time).await;
 }
 
-pub async fn wait_until(fw: FlowWorld, release_time: f32) {
+pub async fn _wait_until(fw: FlowWorld, release_time: f32) {
     fw.poll(move |w, cx| {
         let mut wmap = w.get_resource_mut::<FlowTimerMap>().unwrap();
         if release_time <= wmap.current_time {
